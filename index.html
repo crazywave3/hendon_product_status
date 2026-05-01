@@ -25,6 +25,7 @@
       background: var(--bg);
       color: var(--text-primary);
       min-height: 100vh;
+      overflow-y: scroll;
     }
 
     /* ── 헤더 ── */
@@ -72,14 +73,20 @@
     /* ── 상태 필터 행 ── */
     .filter-row-status {
       display: flex;
-      gap: 5px;
-      padding: 8px 14px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
+      border-bottom: 1px solid var(--border);
       background: #EDECEA;
     }
-    .filter-row-status::-webkit-scrollbar { display: none; }
+
+    .filter-status-inner {
+      display: flex;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .filter-status-inner {
+        width: 50%;
+      }
+    }
 
     /* ── 브랜드 칩 ── */
     .chip-brand {
@@ -104,45 +111,52 @@
       font-family: 'Noto Sans KR', sans-serif;
       font-size: 12px;
       font-weight: 400;
-      padding: 4px 11px;
-      border-radius: 6px;
-      border: 1px solid transparent;
+      flex: 1;
+      padding: 8px 4px;
+      border: none;
+      border-right: 1px solid var(--border);
       background: transparent;
       color: var(--text-secondary);
       cursor: pointer;
       white-space: nowrap;
-      flex-shrink: 0;
+      text-align: center;
       transition: all 0.15s;
     }
-    .chip-status:hover { background: rgba(0,0,0,0.05); }
+    .chip-status:last-child { border-right: none; }
+    .chip-status:hover { background: rgba(0,0,0,0.04); }
     .chip-status.active {
       background: var(--surface);
       color: var(--text-primary);
-      border-color: var(--border);
       font-weight: 500;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border-bottom: 2px solid var(--accent);
     }
 
     /* ── 요약 바 ── */
     .summary-bar {
       display: flex;
-      align-items: stretch;
       border-bottom: 1px solid var(--border);
       background: var(--surface);
-      overflow-x: auto;
-      scrollbar-width: none;
     }
-    .summary-bar::-webkit-scrollbar { display: none; }
+
+    .summary-inner {
+      display: flex;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .summary-inner {
+        width: 50%;
+      }
+    }
 
     .summary-item {
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 10px 16px;
+      flex: 1;
+      padding: 8px 4px;
       border-right: 1px solid var(--border);
-      white-space: nowrap;
-      flex-shrink: 0;
       gap: 2px;
     }
     .summary-item:last-child { border-right: none; }
@@ -150,18 +164,19 @@
     .summary-label {
       font-size: 11px;
       color: var(--text-muted);
+      white-space: nowrap;
     }
 
     .summary-count {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: var(--text-primary);
-      line-height: 1.2;
+      line-height: 1.3;
     }
 
-    .summary-item.done .summary-count { color: #3A6B12; }
+    .summary-item.done .summary-count  { color: #3A6B12; }
     .summary-item.ready .summary-count { color: #8A5010; }
-    .summary-item.none .summary-count { color: #888; }
+    .summary-item.none .summary-count  { color: #888; }
 
     /* ── 메인 ── */
     main {
@@ -210,11 +225,7 @@
     }
     .card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.07); }
 
-    /* 필터로 숨겨진 카드 - 자리 유지하면서 투명 처리 */
-    .card.hidden {
-      visibility: hidden;
-      pointer-events: none;
-    }
+
 
     .card-image {
       width: 100%;
@@ -279,15 +290,19 @@
     <p class="site-title">핸든 제품 현황<span>Hendon</span></p>
   </div>
   <div class="filter-row-brand" id="brandGroup"></div>
-  <div class="filter-row-status" id="statusGroup">
-    <button class="chip-status" data-status="all">전체</button>
-    <button class="chip-status active" data-status="등록완료">등록완료</button>
-    <button class="chip-status" data-status="등록예정">등록예정(재고있음)</button>
-    <button class="chip-status" data-status="등록미정">등록미정(재고없음)</button>
+  <div class="filter-row-status">
+    <div class="filter-status-inner" id="statusGroup">
+      <button class="chip-status" data-status="all">전체</button>
+      <button class="chip-status active" data-status="등록완료">등록완료</button>
+      <button class="chip-status" data-status="등록예정">등록예정(재고있음)</button>
+      <button class="chip-status" data-status="등록미정">등록미정(재고없음)</button>
+    </div>
   </div>
 </header>
 
-<div class="summary-bar" id="summaryBar"></div>
+<div class="summary-bar">
+  <div class="summary-inner" id="summaryBar"></div>
+</div>
 
 <main id="main"></main>
 
@@ -543,11 +558,11 @@ function renderSummary() {
       <span class="summary-count">${s.done}</span>
     </div>
     <div class="summary-item ready">
-      <span class="summary-label">등록예정</span>
+      <span class="summary-label">등록예정(재고있음)</span>
       <span class="summary-count">${s.ready}</span>
     </div>
     <div class="summary-item none">
-      <span class="summary-label">등록미정</span>
+      <span class="summary-label">등록미정(재고없음)</span>
       <span class="summary-count">${s.none}</span>
     </div>`;
 }
@@ -565,33 +580,42 @@ function cardHTML(p) {
   const img  = p.image
     ? `<img class="card-image" src="${p.image}" alt="${p.name}" loading="lazy" />`
     : placeholder();
-  /* 상태 필터에 맞지 않는 카드는 hidden 클래스로 자리 유지하면서 숨김 */
-  const hidden = (activeStatus !== 'all' && p.status !== activeStatus) ? ' hidden' : '';
-  return `<div class="card${hidden}">${img}<div class="card-body">
+  return `<div class="card">${img}<div class="card-body">
     <p class="card-name">${p.name}</p>
     <span class="badge ${meta.cls}">${meta.label}</span>
   </div></div>`;
 }
 
-/* 카드 렌더: 브랜드별 그리드 유지, 상태 필터는 visibility로만 */
+function filtered() {
+  return PRODUCTS.filter(p =>
+    (activeBrand  === 'all' || p.brand  === activeBrand) &&
+    (activeStatus === 'all' || p.status === activeStatus)
+  );
+}
+
 function renderCards() {
   const mainEl = document.getElementById('main');
 
   if (activeBrand !== 'all') {
-    const data = PRODUCTS.filter(p => p.brand === activeBrand);
-    mainEl.innerHTML = `<div class="product-grid">${data.map(cardHTML).join('')}</div>`;
+    const data = filtered();
+    mainEl.innerHTML = data.length
+      ? `<div class="product-grid">${data.map(cardHTML).join('')}</div>`
+      : '<div class="empty">해당하는 제품이 없습니다</div>';
     return;
   }
 
   const html = brands.map(b => {
-    const data = PRODUCTS.filter(p => p.brand === b);
+    const data = PRODUCTS.filter(p =>
+      p.brand === b && (activeStatus === 'all' || p.status === activeStatus)
+    );
+    if (!data.length) return '';
     return `<div class="brand-section">
       <p class="brand-heading">${b}</p>
       <div class="product-grid">${data.map(cardHTML).join('')}</div>
     </div>`;
   }).join('');
 
-  mainEl.innerHTML = html;
+  mainEl.innerHTML = html || '<div class="empty">해당하는 제품이 없습니다</div>';
 }
 
 renderSummary();
