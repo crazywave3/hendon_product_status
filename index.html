@@ -25,6 +25,7 @@
       background: var(--bg);
       color: var(--text-primary);
       min-height: 100vh;
+      overflow-y: scroll;
     }
 
     /* ── 헤더 ── */
@@ -72,14 +73,20 @@
     /* ── 상태 필터 행 ── */
     .filter-row-status {
       display: flex;
-      gap: 5px;
-      padding: 8px 14px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
+      border-bottom: 1px solid var(--border);
       background: #EDECEA;
     }
-    .filter-row-status::-webkit-scrollbar { display: none; }
+
+    .filter-status-inner {
+      display: flex;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .filter-status-inner {
+        width: 50%;
+      }
+    }
 
     /* ── 브랜드 칩 ── */
     .chip-brand {
@@ -97,62 +104,79 @@
       transition: all 0.15s;
     }
     .chip-brand:hover { background: var(--bg); }
-    .chip-brand.active {
-      background: var(--accent);
-      color: #fff;
-      border-color: var(--accent);
-    }
+    .chip-brand.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
     /* ── 상태 칩 ── */
     .chip-status {
       font-family: 'Noto Sans KR', sans-serif;
       font-size: 12px;
       font-weight: 400;
-      padding: 4px 11px;
-      border-radius: 6px;
-      border: 1px solid transparent;
+      flex: 1;
+      padding: 8px 4px;
+      border: none;
+      border-right: 1px solid var(--border);
       background: transparent;
       color: var(--text-secondary);
       cursor: pointer;
       white-space: nowrap;
-      flex-shrink: 0;
+      text-align: center;
       transition: all 0.15s;
     }
-    .chip-status:hover { background: rgba(0,0,0,0.05); }
+    .chip-status:last-child { border-right: none; }
+    .chip-status:hover { background: rgba(0,0,0,0.04); }
     .chip-status.active {
       background: var(--surface);
       color: var(--text-primary);
-      border-color: var(--border);
       font-weight: 500;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      border-bottom: 2px solid var(--accent);
     }
 
     /* ── 요약 바 ── */
     .summary-bar {
       display: flex;
-      gap: 14px;
-      padding: 9px 14px;
       border-bottom: 1px solid var(--border);
-      overflow-x: auto;
-      scrollbar-width: none;
-      background: var(--bg);
+      background: var(--surface);
     }
-    .summary-bar::-webkit-scrollbar { display: none; }
+
+    .summary-inner {
+      display: flex;
+      width: 100%;
+    }
+
+    @media (min-width: 768px) {
+      .summary-inner {
+        width: 50%;
+      }
+    }
 
     .summary-item {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      gap: 5px;
-      white-space: nowrap;
-      font-size: 12px;
-      color: var(--text-secondary);
-      flex-shrink: 0;
+      justify-content: center;
+      flex: 1;
+      padding: 8px 4px;
+      border-right: 1px solid var(--border);
+      gap: 2px;
     }
-    .summary-count { font-size: 13px; font-weight: 500; color: var(--text-primary); }
-    .dot { width: 7px; height: 7px; border-radius: 50%; }
-    .dot-done  { background: #5AA830; }
-    .dot-ready { background: #E09020; }
-    .dot-none  { background: #C0BDB8; }
+    .summary-item:last-child { border-right: none; }
+
+    .summary-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .summary-count {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .summary-item.done .summary-count  { color: #3A6B12; }
+    .summary-item.ready .summary-count { color: #8A5010; }
+    .summary-item.none .summary-count  { color: #888; }
 
     /* ── 메인 ── */
     main {
@@ -173,11 +197,12 @@
       padding-left: 2px;
     }
 
-    /* 모바일: 3열 */
+    /* 모바일: 3열 고정 */
     .product-grid {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 7px;
+      align-items: start;
     }
 
     /* 데스크탑: 5열 */
@@ -185,9 +210,9 @@
       .header-title { padding: 16px 20px 12px; }
       .filter-row-brand { padding: 10px 20px; }
       .filter-row-status { padding: 9px 20px; }
-      .summary-bar { padding: 9px 20px; }
       main { padding: 18px 20px 60px; }
       .product-grid { grid-template-columns: repeat(5, 1fr); gap: 13px; }
+      .summary-item { padding: 10px 24px; }
     }
 
     /* ── 카드 ── */
@@ -199,6 +224,8 @@
       transition: transform 0.16s, box-shadow 0.16s;
     }
     .card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.07); }
+
+
 
     .card-image {
       width: 100%;
@@ -249,7 +276,6 @@
     .badge-none  { background: #EBEBEB; color: #666460; }
 
     .empty {
-      grid-column: 1 / -1;
       text-align: center;
       padding: 40px 0;
       color: var(--text-muted);
@@ -264,15 +290,19 @@
     <p class="site-title">핸든 제품 현황<span>Hendon</span></p>
   </div>
   <div class="filter-row-brand" id="brandGroup"></div>
-  <div class="filter-row-status" id="statusGroup">
-    <button class="chip-status" data-status="all">전체</button>
-    <button class="chip-status active" data-status="등록완료">등록완료</button>
-    <button class="chip-status" data-status="등록예정">등록예정(재고있음)</button>
-    <button class="chip-status" data-status="등록미정">등록미정(재고없음)</button>
+  <div class="filter-row-status">
+    <div class="filter-status-inner" id="statusGroup">
+      <button class="chip-status" data-status="all">전체</button>
+      <button class="chip-status active" data-status="등록완료">등록완료</button>
+      <button class="chip-status" data-status="등록예정">등록예정(재고있음)</button>
+      <button class="chip-status" data-status="등록미정">등록미정(재고없음)</button>
+    </div>
   </div>
 </header>
 
-<div class="summary-bar" id="summaryBar"></div>
+<div class="summary-bar">
+  <div class="summary-inner" id="summaryBar"></div>
+</div>
 
 <main id="main"></main>
 
@@ -290,9 +320,6 @@
 
    [ 상태 변경 ]
      status 값만 바꾸면 색상·뱃지 자동 변경됩니다.
-
-   [ 이미지 경로 ]
-     image: '제품_데이터/01_데이세븐/01_등록완료/001_가위형집게.jpg'
 
    [ 저장 후 브라우저 새로고침하면 바로 반영됩니다 ]
 ================================================================ */
@@ -466,9 +493,9 @@ const PRODUCTS = [
 /* ================================================================ */
 
 const STATUS_META = {
-  '등록완료': { cls: 'badge-done',  dot: 'dot-done',  label: '등록완료' },
-  '등록예정': { cls: 'badge-ready', dot: 'dot-ready', label: '등록예정(재고있음)' },
-  '등록미정': { cls: 'badge-none',  dot: 'dot-none',  label: '등록미정(재고없음)' },
+  '등록완료': { cls: 'badge-done',  label: '등록완료' },
+  '등록예정': { cls: 'badge-ready', label: '등록예정(재고있음)' },
+  '등록미정': { cls: 'badge-none',  label: '등록미정(재고없음)' },
 };
 
 /* 첫 화면 기본값: 데이세븐 + 등록완료 */
@@ -476,6 +503,17 @@ let activeBrand  = '데이세븐';
 let activeStatus = '등록완료';
 
 const brands = [...new Set(PRODUCTS.map(p => p.brand))];
+
+/* 브랜드별 전체 집계 (상태 필터와 무관하게 항상 고정) */
+function getBrandSummary(brand) {
+  const base = brand === 'all' ? PRODUCTS : PRODUCTS.filter(p => p.brand === brand);
+  return {
+    total: base.length,
+    done:  base.filter(p => p.status === '등록완료').length,
+    ready: base.filter(p => p.status === '등록예정').length,
+    none:  base.filter(p => p.status === '등록미정').length,
+  };
+}
 
 /* 브랜드 칩 생성 */
 const brandGroup = document.getElementById('brandGroup');
@@ -494,7 +532,8 @@ brandGroup.addEventListener('click', e => {
   activeBrand = chip.dataset.brand;
   brandGroup.querySelectorAll('.chip-brand').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
-  render();
+  renderSummary();
+  renderCards();
 });
 
 document.getElementById('statusGroup').addEventListener('click', e => {
@@ -503,14 +542,29 @@ document.getElementById('statusGroup').addEventListener('click', e => {
   activeStatus = chip.dataset.status;
   document.getElementById('statusGroup').querySelectorAll('.chip-status').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
-  render();
+  renderCards(); /* 요약 바는 건드리지 않음 */
 });
 
-function filtered() {
-  return PRODUCTS.filter(p =>
-    (activeBrand  === 'all' || p.brand  === activeBrand) &&
-    (activeStatus === 'all' || p.status === activeStatus)
-  );
+/* 요약 바: 브랜드 기준 고정, 상태 필터 무관 */
+function renderSummary() {
+  const s = getBrandSummary(activeBrand);
+  document.getElementById('summaryBar').innerHTML = `
+    <div class="summary-item">
+      <span class="summary-label">전체 제품</span>
+      <span class="summary-count">${s.total}</span>
+    </div>
+    <div class="summary-item done">
+      <span class="summary-label">등록완료</span>
+      <span class="summary-count">${s.done}</span>
+    </div>
+    <div class="summary-item ready">
+      <span class="summary-label">등록예정(재고있음)</span>
+      <span class="summary-count">${s.ready}</span>
+    </div>
+    <div class="summary-item none">
+      <span class="summary-label">등록미정(재고없음)</span>
+      <span class="summary-count">${s.none}</span>
+    </div>`;
 }
 
 function placeholder() {
@@ -532,42 +586,40 @@ function cardHTML(p) {
   </div></div>`;
 }
 
-function renderSummary(data) {
-  const c = { '등록완료': 0, '등록예정': 0, '등록미정': 0 };
-  data.forEach(p => { if (c[p.status] !== undefined) c[p.status]++; });
-  document.getElementById('summaryBar').innerHTML = `
-    <div class="summary-item"><span class="summary-count">${data.length}</span><span>개 제품</span></div>
-    <div class="summary-item"><span class="dot dot-done"></span><span class="summary-count">${c['등록완료']}</span><span>등록완료</span></div>
-    <div class="summary-item"><span class="dot dot-ready"></span><span class="summary-count">${c['등록예정']}</span><span>등록예정</span></div>
-    <div class="summary-item"><span class="dot dot-none"></span><span class="summary-count">${c['등록미정']}</span><span>등록미정</span></div>`;
+function filtered() {
+  return PRODUCTS.filter(p =>
+    (activeBrand  === 'all' || p.brand  === activeBrand) &&
+    (activeStatus === 'all' || p.status === activeStatus)
+  );
 }
 
-function render() {
-  const data = filtered();
-  renderSummary(data);
+function renderCards() {
   const mainEl = document.getElementById('main');
 
   if (activeBrand !== 'all') {
-    mainEl.innerHTML = `<div class="product-grid">${
-      data.length ? data.map(cardHTML).join('') : '<div class="empty">해당하는 제품이 없습니다</div>'
-    }</div>`;
+    const data = filtered();
+    mainEl.innerHTML = data.length
+      ? `<div class="product-grid">${data.map(cardHTML).join('')}</div>`
+      : '<div class="empty">해당하는 제품이 없습니다</div>';
     return;
   }
 
-  const byBrand = Object.fromEntries(brands.map(b => [b, []]));
-  data.forEach(p => { if (byBrand[p.brand]) byBrand[p.brand].push(p); });
-
-  const html = brands
-    .filter(b => byBrand[b].length > 0)
-    .map(b => `<div class="brand-section">
+  const html = brands.map(b => {
+    const data = PRODUCTS.filter(p =>
+      p.brand === b && (activeStatus === 'all' || p.status === activeStatus)
+    );
+    if (!data.length) return '';
+    return `<div class="brand-section">
       <p class="brand-heading">${b}</p>
-      <div class="product-grid">${byBrand[b].map(cardHTML).join('')}</div>
-    </div>`).join('');
+      <div class="product-grid">${data.map(cardHTML).join('')}</div>
+    </div>`;
+  }).join('');
 
-  mainEl.innerHTML = html || '<div class="empty" style="padding:60px 0">해당하는 제품이 없습니다</div>';
+  mainEl.innerHTML = html || '<div class="empty">해당하는 제품이 없습니다</div>';
 }
 
-render();
+renderSummary();
+renderCards();
 </script>
 </body>
 </html>
