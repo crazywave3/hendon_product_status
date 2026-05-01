@@ -41,6 +41,9 @@
     .header-title {
       padding: 14px 14px 10px;
       border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
     }
 
     .site-title {
@@ -48,6 +51,7 @@
       font-weight: 700;
       letter-spacing: -0.3px;
       color: var(--text-primary);
+      white-space: nowrap;
     }
 
     .site-title span {
@@ -58,18 +62,29 @@
       letter-spacing: 0.05em;
     }
 
+    .btn-all {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 11px;
+      font-weight: 400;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .btn-all:hover { background: var(--bg); }
+    .btn-all.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
     /* ── 브랜드 필터 행 ── */
     .filter-row-brand {
       display: flex;
-      gap: 5px;
       padding: 9px 14px;
-      overflow-x: auto;
-      scrollbar-width: none;
-      -webkit-overflow-scrolling: touch;
       background: var(--surface);
       border-bottom: 1px solid var(--border);
     }
-    .filter-row-brand::-webkit-scrollbar { display: none; }
 
     /* ── 상태 필터 행 ── */
     .filter-row-status {
@@ -88,6 +103,19 @@
         width: 50%;
       }
     }
+
+    /* ── 브랜드 필터 행 ── */
+    .filter-row-brand {
+      display: flex;
+      gap: 5px;
+      padding: 9px 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-row-brand::-webkit-scrollbar { display: none; }
 
     /* ── 브랜드 칩 ── */
     .chip-brand {
@@ -265,6 +293,7 @@
 <header>
   <div class="header-title">
     <p class="site-title">핸든 제품 현황<span>Hendon</span></p>
+    <button class="btn-all" id="btnAll">핸든 제품 전체보기</button>
   </div>
   <div class="filter-row-brand" id="brandGroup"></div>
   <div class="filter-row-status">
@@ -490,9 +519,9 @@ function getBrandSummary(brand) {
   };
 }
 
-/* 브랜드 칩 생성 */
+/* 브랜드 칩 생성 (전체 제외) */
 const brandGroup = document.getElementById('brandGroup');
-[{ val: 'all', label: '전체' }, ...brands.map(b => ({ val: b, label: b }))]
+brands.map(b => ({ val: b, label: b }))
   .forEach(({ val, label }) => {
     const btn = document.createElement('button');
     btn.className = 'chip-brand' + (val === activeBrand ? ' active' : '');
@@ -501,12 +530,28 @@ const brandGroup = document.getElementById('brandGroup');
     brandGroup.appendChild(btn);
   });
 
+/* 전체보기 버튼 */
+document.getElementById('btnAll').addEventListener('click', () => {
+  activeBrand = 'all';
+  activeStatus = 'all';
+  brandGroup.querySelectorAll('.chip-brand').forEach(c => c.classList.remove('active'));
+  document.getElementById('statusGroup').querySelectorAll('.chip-status').forEach(c => c.classList.remove('active'));
+  document.getElementById('btnAll').classList.add('active');
+  window.scrollTo({ top: 0 });
+  renderSummary();
+  renderCards();
+});
+
 brandGroup.addEventListener('click', e => {
   const chip = e.target.closest('[data-brand]');
   if (!chip) return;
   activeBrand = chip.dataset.brand;
+  activeStatus = '등록완료';
   brandGroup.querySelectorAll('.chip-brand').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
+  document.getElementById('btnAll').classList.remove('active');
+  document.getElementById('statusGroup').querySelectorAll('.chip-status').forEach(c => c.classList.remove('active'));
+  document.querySelector('.chip-status[data-status="등록완료"]').classList.add('active');
   window.scrollTo({ top: 0 });
   renderSummary();
   renderCards();
