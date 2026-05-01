@@ -219,7 +219,7 @@
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      height: 62px;
+      height: 75px;
     }
 
     .card-name {
@@ -236,7 +236,7 @@
 
     @media (min-width: 768px) {
       .card-name { font-size: 12px; }
-      .card-body { padding: 9px 10px 11px; height: 68px; }
+      .card-body { padding: 9px 10px 11px; height: 80px; }
     }
 
     .badge {
@@ -246,6 +246,7 @@
       padding: 2px 7px;
       border-radius: 999px;
       line-height: 1.5;
+      text-align: center;
     }
     .badge-done  { background: #E6F0DE; color: #3A6B12; }
     .badge-ready { background: #FEF0D6; color: #8A5010; }
@@ -602,6 +603,10 @@ document.addEventListener('touchmove', e => {
     e.preventDefault();
   }
 }, { passive: false });
+
+/* HTML 요소에도 overscroll 방지 */
+document.documentElement.style.overscrollBehavior = 'none';
+document.body.style.overscrollBehavior = 'none';
 </script>
 </body>
 </html>
