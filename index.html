@@ -216,8 +216,10 @@
 
     .card-body {
       padding: 7px 8px 9px;
-      height: 58px;
-      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      height: 62px;
     }
 
     .card-name {
@@ -230,12 +232,11 @@
       -webkit-line-clamp: 2;
       -webkit-box-orient: vertical;
       overflow: hidden;
-      height: 2.8em;
     }
 
     @media (min-width: 768px) {
       .card-name { font-size: 12px; }
-      .card-body { padding: 9px 10px 11px; height: 64px; }
+      .card-body { padding: 9px 10px 11px; height: 68px; }
     }
 
     .badge {
@@ -505,6 +506,7 @@ brandGroup.addEventListener('click', e => {
   activeBrand = chip.dataset.brand;
   brandGroup.querySelectorAll('.chip-brand').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
+  window.scrollTo({ top: 0 });
   renderSummary();
   renderCards();
 });
@@ -515,7 +517,8 @@ document.getElementById('statusGroup').addEventListener('click', e => {
   activeStatus = chip.dataset.status;
   document.getElementById('statusGroup').querySelectorAll('.chip-status').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
-  renderCards(); /* 요약 바는 건드리지 않음 */
+  window.scrollTo({ top: 0 });
+  renderCards();
 });
 
 /* 버튼에 숫자 표시: 브랜드 기준 고정, 상태 필터 무관 */
@@ -583,13 +586,19 @@ renderCards();
 
 /* 모바일 Pull-to-refresh 방지 */
 let startY = 0;
+let startScrollY = 0;
 document.addEventListener('touchstart', e => {
   startY = e.touches[0].clientY;
+  startScrollY = window.scrollY;
 }, { passive: false });
 
 document.addEventListener('touchmove', e => {
   const y = e.touches[0].clientY;
-  if (y > startY && window.scrollY === 0) {
+  const deltaY = y - startY;
+  if (deltaY > 0 && startScrollY === 0) {
+    e.preventDefault();
+  }
+  if (deltaY > 0 && window.scrollY <= 0) {
     e.preventDefault();
   }
 }, { passive: false });
