@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>핸든 제품 현황</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #F5F4F0;
+      --surface: #FFFFFF;
+      --border: #E2E0DA;
+      --text-primary: #1A1916;
+      --text-secondary: #7A7870;
+      --text-muted: #B0AEA8;
+      --accent: #1A1916;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+    }
+
+    /* ── 헤더 ── */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .header-title {
+      padding: 14px 14px 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .site-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+    }
+
+    .site-title span {
+      font-weight: 300;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-left: 7px;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── 브랜드 필터 행 ── */
+    .filter-row-brand {
+      display: flex;
+      gap: 5px;
+      padding: 9px 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .filter-row-brand::-webkit-scrollbar { display: none; }
+
+    /* ── 상태 필터 행 ── */
+    .filter-row-status {
+      display: flex;
+      gap: 5px;
+      padding: 8px 14px;
+      overflow-x: auto;
+      scrollbar-width: none;
+      -webkit-overflow-scrolling: touch;
+      background: #EDECEA;
+    }
+    .filter-row-status::-webkit-scrollbar { display: none; }
+
+    /* ── 브랜드 칩 ── */
+    .chip-brand {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .chip-brand:hover { background: var(--bg); }
+    .chip-brand.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    /* ── 상태 칩 ── */
+    .chip-status {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 12px;
+      font-weight: 400;
+      padding: 4px 11px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: all 0.15s;
+    }
+    .chip-status:hover { background: rgba(0,0,0,0.05); }
+    .chip-status.active {
+      background: var(--surface);
+      color: var(--text-primary);
+      border-color: var(--border);
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+
+    /* ── 요약 바 ── */
+    .summary-bar {
+      display: flex;
+      gap: 14px;
+      padding: 9px 14px;
+      border-bottom: 1px solid var(--border);
+      overflow-x: auto;
+      scrollbar-width: none;
+      background: var(--bg);
+    }
+    .summary-bar::-webkit-scrollbar { display: none; }
+
+    .summary-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      white-space: nowrap;
+      font-size: 12px;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+    .summary-count { font-size: 13px; font-weight: 500; color: var(--text-primary); }
+    .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .dot-done  { background: #5AA830; }
+    .dot-ready { background: #E09020; }
+    .dot-none  { background: #C0BDB8; }
+
+    /* ── 메인 ── */
+    main {
+      padding: 14px 10px 56px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .brand-section { margin-bottom: 26px; }
+
+    .brand-heading {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-muted);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 9px;
+      padding-left: 2px;
+    }
+
+    /* 모바일: 3열 */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+    }
+
+    /* 데스크탑: 5열 */
+    @media (min-width: 768px) {
+      .header-title { padding: 16px 20px 12px; }
+      .filter-row-brand { padding: 10px 20px; }
+      .filter-row-status { padding: 9px 20px; }
+      .summary-bar { padding: 9px 20px; }
+      main { padding: 18px 20px 60px; }
+      .product-grid { grid-template-columns: repeat(5, 1fr); gap: 13px; }
+    }
+
+    /* ── 카드 ── */
+    .card {
+      background: var(--surface);
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      transition: transform 0.16s, box-shadow 0.16s;
+    }
+    .card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.07); }
+
+    .card-image {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      object-fit: cover;
+      display: block;
+    }
+
+    .img-placeholder {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #EDECEA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .img-placeholder svg { width: 28%; height: 28%; opacity: 0.22; }
+
+    .card-body { padding: 7px 8px 9px; }
+
+    .card-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+      .card-name { font-size: 12px; }
+      .card-body { padding: 9px 10px 11px; }
+    }
+
+    .badge {
+      display: inline-block;
+      font-size: 10px;
+      font-weight: 500;
+      padding: 2px 7px;
+      border-radius: 999px;
+      line-height: 1.5;
+    }
+    .badge-done  { background: #E6F0DE; color: #3A6B12; }
+    .badge-ready { background: #FEF0D6; color: #8A5010; }
+    .badge-none  { background: #EBEBEB; color: #666460; }
+
+    .empty {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px 0;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-title">
+    <p class="site-title">핸든 제품 현황<span>Hendon</span></p>
+  </div>
+  <div class="filter-row-brand" id="brandGroup"></div>
+  <div class="filter-row-status" id="statusGroup">
+    <button class="chip-status" data-status="all">전체</button>
+    <button class="chip-status active" data-status="등록완료">등록완료</button>
+    <button class="chip-status" data-status="등록예정">등록예정(재고있음)</button>
+    <button class="chip-status" data-status="등록미정">등록미정(재고없음)</button>
+  </div>
+</header>
+
+<div class="summary-bar" id="summaryBar"></div>
+
+<main id="main"></main>
+
+<script>
+/* ================================================================
+   ★ 데이터 수정 가이드 ★
+
+   [ 상태(status) 값은 아래 세 가지만 사용 ]
+     '등록완료'   → 초록 뱃지
+     '등록예정'   → 주황 뱃지  (재고있음)
+     '등록미정'   → 회색 뱃지  (재고없음)
+
+   [ 제품 추가 ]
+     { brand: '브랜드명', name: '제품명', status: '등록완료', image: '제품_데이터/폴더/파일.jpg' },
+
+   [ 상태 변경 ]
+     status 값만 바꾸면 색상·뱃지 자동 변경됩니다.
+
+   [ 이미지 경로 ]
+     image: '제품_데이터/01_데이세븐/01_등록완료/001_가위형집게.jpg'
+
+   [ 저장 후 브라우저 새로고침하면 바로 반영됩니다 ]
+================================================================ */
+const PRODUCTS = [
+  { brand: '데이세븐', name: '가위형집게', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/001_가위형집게.jpg' },
+  { brand: '데이세븐', name: '미니국자_블랙', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/002_미니국자_블랙.jpg' },
+  { brand: '데이세븐', name: '미니국자_그레이', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/003_미니국자_그레이.jpg' },
+  { brand: '데이세븐', name: '스탠딩집게_24cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/004_스탠딩집게_24cm.jpg' },
+  { brand: '데이세븐', name: '스탠딩집게_30cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/005_스탠딩집게_30cm.jpg' },
+  { brand: '데이세븐', name: '라운드헤드집게_25cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/006_라운드헤드집게_25cm.jpg' },
+  { brand: '데이세븐', name: '라운드헤드집게_30cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/007_라운드헤드집게_30cm.jpg' },
+  { brand: '데이세븐', name: '일자형집게_25cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/008_일자형집게_25cm.jpg' },
+  { brand: '데이세븐', name: '일자형집게_30cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/009_일자형집게_30cm.jpg' },
+  { brand: '데이세븐', name: '오프셋집게_26cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/010_오프셋집게_26cm.jpg' },
+  { brand: '데이세븐', name: '오프셋집게_30cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/011_오프셋집게_30cm.jpg' },
+  { brand: '데이세븐', name: '데코핀셋집게_12cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/012_데코핀셋집게_12cm.jpg' },
+  { brand: '데이세븐', name: '씨엘편수냄비_18cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/013_씨엘편수냄비_18cm.jpg' },
+  { brand: '데이세븐', name: '씨엘양수냄비_20cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/014_씨엘양수냄비_20cm.jpg' },
+  { brand: '데이세븐', name: '씨엘양수냄비_24cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/015_씨엘양수냄비_24cm.jpg' },
+  { brand: '데이세븐', name: '씨엘전골냄비_24cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/016_씨엘전골냄비_24cm.jpg' },
+  { brand: '데이세븐', name: '비타편수냄비_14cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/017_비타편수냄비_14cm.jpg' },
+  { brand: '데이세븐', name: '비타편수냄비_16cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/018_비타편수냄비_16cm.jpg' },
+  { brand: '데이세븐', name: '비타양수냄비_18cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/019_비타양수냄비_18cm.jpg' },
+  { brand: '데이세븐', name: '비타양수냄비_24cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/020_비타양수냄비_24cm.jpg' },
+  { brand: '데이세븐', name: '비타전골냄비_24cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/021_비타전골냄비_24cm.jpg' },
+  { brand: '데이세븐', name: '도가편수냄비_18cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/022_도가편수냄비_18cm.jpg' },
+  { brand: '데이세븐', name: '도가양수냄비_24cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/023_도가양수냄비_24cm.jpg' },
+  { brand: '데이세븐', name: '도가전골냄비_24cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/024_도가전골냄비_24cm.jpg' },
+  { brand: '데이세븐', name: '도가프라이팬_26cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/025_도가프라이팬_26cm.jpg' },
+  { brand: '데이세븐', name: '도가사각프라이팬_22cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/026_도가사각프라이팬_22cm.jpg' },
+  { brand: '데이세븐', name: '케틀팟_1.5L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/027_케틀팟_1.5L.jpg' },
+  { brand: '데이세븐', name: '케틀팟_2L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/028_케틀팟_2L.jpg' },
+  { brand: '데이세븐', name: '컬러케틀팟_2L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/029_컬러케틀팟_2L.jpg' },
+  { brand: '데이세븐', name: '무연마케틀팟_1.5L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/030_무연마케틀팟_1.5L.jpg' },
+  { brand: '데이세븐', name: '무연마케틀팟_2L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/031_무연마케틀팟_2L.jpg' },
+  { brand: '데이세븐', name: '케틀셰프팟_2L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/032_케틀셰프팟_2L.jpg' },
+  { brand: '데이세븐', name: '잼팟_9L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/033_잼팟_9L.jpg' },
+  { brand: '데이세븐', name: '도담주전자_1.5L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/034_도담주전자_1.5L.jpg' },
+  { brand: '데이세븐', name: '도담주전자_3L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/035_도담주전자_3L.jpg' },
+  { brand: '데이세븐', name: '도담주전자_5L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/036_도담주전자_5L.jpg' },
+  { brand: '데이세븐', name: '도담주전자_7L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/037_도담주전자_7L.jpg' },
+  { brand: '데이세븐', name: '토르주전자_1.2L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/038_토르주전자_1.2L.jpg' },
+  { brand: '데이세븐', name: '토르주전자_2.5L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/039_토르주전자_2.5L.jpg' },
+  { brand: '데이세븐', name: '토르주전자_2.5L_2', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/040_토르주전자_2.5L.jpg' },
+  { brand: '데이세븐', name: '토르주전자_3.5L', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/041_토르주전자_3.5L.jpg' },
+  { brand: '데이세븐', name: '엑스프라이팬_20cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/042_엑스프라이팬_20cm.jpg' },
+  { brand: '데이세븐', name: '엑스프라이팬_26cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/043_엑스프라이팬_26cm.jpg' },
+  { brand: '데이세븐', name: '엑스프라이팬_30cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/044_엑스프라이팬_30cm.jpg' },
+  { brand: '데이세븐', name: '벨라소테팬_24cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/045_벨라소테팬_24cm.jpg' },
+  { brand: '데이세븐', name: '벨라소테팬_28cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/046_벨라소테팬_28cm.jpg' },
+  { brand: '데이세븐', name: '믹싱볼채반_22cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/047_믹싱볼채반_22cm.jpg' },
+  { brand: '데이세븐', name: '믹싱볼채반_26cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/048_믹싱볼채반_26cm.jpg' },
+  { brand: '데이세븐', name: '더블트레이믹싱볼_22cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/049_더블트레이믹싱볼_22cm.jpg' },
+  { brand: '데이세븐', name: '더블트레이믹싱볼_24cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/050_더블트레이믹싱볼_24cm.jpg' },
+  { brand: '데이세븐', name: '올스텐믹싱볼3종세트', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/051_올스텐믹싱볼3종세트.jpg' },
+  { brand: '데이세븐', name: '타공망편수_20cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/052_타공망편수_20cm.jpg' },
+  { brand: '데이세븐', name: '타공망양수_23cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/053_타공망양수_23cm.jpg' },
+  { brand: '데이세븐', name: '타공망양수_26cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/054_타공망양수_26cm.jpg' },
+  { brand: '데이세븐', name: '타공망3종세트', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/055_타공망3종세트.jpg' },
+  { brand: '데이세븐', name: '거름망_4.5cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/056_거름망_4.5cm.jpg' },
+  { brand: '데이세븐', name: '거름망_6.5cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/057_거름망_6.5cm.jpg' },
+  { brand: '데이세븐', name: '거름망_8.5cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/058_거름망_8.5cm.jpg' },
+  { brand: '데이세븐', name: '솔트냄비2종세트', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/059_솔트냄비2종세트.jpg' },
+  { brand: '데이세븐', name: '예담냄비2종세트', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/060_예담냄비2종세트.jpg' },
+  { brand: '데이세븐', name: '사각트레이망세트_23.5cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/061_사각트레이망세트_23.5cm.jpg' },
+  { brand: '데이세븐', name: '사각트레이망세트_26.5cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/062_사각트레이망세트_26.5cm.jpg' },
+  { brand: '데이세븐', name: '사각트레이망세트_31.5cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/063_사각트레이망세트_31.5cm.jpg' },
+  { brand: '데이세븐', name: '사각트레이망세트_40.5cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/064_사각트레이망세트_40.5cm.jpg' },
+  { brand: '데이세븐', name: '깊은사각트레이', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/065_깊은사각트레이.jpg' },
+  { brand: '데이세븐', name: '깊은사각트레이_1+1', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/066_깊은사각트레이_1+1.jpg' },
+  { brand: '데이세븐', name: '깊은사각오븐트레이3P_23.5cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/067_깊은사각오븐트레이3P_23.5cm.jpg' },
+  { brand: '데이세븐', name: '깊은사각오븐트레이3P_26cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/068_깊은사각오븐트레이3P_26cm.jpg' },
+  { brand: '데이세븐', name: '깊은사각오븐트레이3P_31cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/069_깊은사각오븐트레이3P_31cm.jpg' },
+  { brand: '데이세븐', name: '계량컵_500ml', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/070_계량컵_500ml.jpg' },
+  { brand: '데이세븐', name: '계량컵_1000ml', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/071_계량컵_1000ml.jpg' },
+  { brand: '데이세븐', name: '타공국자_11cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/072_타공국자_11cm.jpg' },
+  { brand: '데이세븐', name: '타공국자_13cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/073_타공국자_13cm.jpg' },
+  { brand: '데이세븐', name: '이중스텐컵민무늬_550ml', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/074_이중스텐컵민무늬_550ml.jpg' },
+  { brand: '데이세븐', name: '이중스텐컵벌집무늬_550ml', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/075_이중스텐컵벌집무늬_550ml.jpg' },
+  { brand: '데이세븐', name: '이중스텐컵긴무늬_550ml', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/076_이중스텐컵긴무늬_550ml.jpg' },
+  { brand: '데이세븐', name: '2단찜냄비', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/077_2단찜냄비.jpg' },
+  { brand: '데이세븐', name: '쌀세척볼_23cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/078_쌀세척볼_23cm.jpg' },
+  { brand: '데이세븐', name: '쌀세척볼_26cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/079_쌀세척볼_26cm.jpg' },
+  { brand: '데이세븐', name: '돔스티머', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/080_돔스티머.jpg' },
+  { brand: '데이세븐', name: '타워곰솥_26cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/081_타워곰솥_26cm.jpg' },
+  { brand: '데이세븐', name: '타워곰솥_30cm', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/082_타워곰솥_30cm.jpg' },
+  { brand: '데이세븐', name: '곰솥냄비', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/083_곰솥냄비.jpg' },
+  { brand: '데이세븐', name: '다용도거치대_소', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/084_다용도거치대_소.jpg' },
+  { brand: '데이세븐', name: '다용도거치대_중', status: '등록완료', image: '제품_데이터/01_데이세븐/01_등록완료/085_다용도거치대_중.jpg' },
+  { brand: '데이세븐', name: '실속믹싱볼_17cm', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/001_실속믹싱볼_17cm.jpg' },
+  { brand: '데이세븐', name: '실속믹싱볼_19cm', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/002_실속믹싱볼_19cm.jpg' },
+  { brand: '데이세븐', name: '실속믹싱볼_23cm', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/003_실속믹싱볼_23cm.jpg' },
+  { brand: '데이세븐', name: '실속믹싱볼_25cm', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/004_실속믹싱볼_25cm.jpg' },
+  { brand: '데이세븐', name: '실속믹싱볼_28cm', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/005_실속믹싱볼_28cm.jpg' },
+  { brand: '데이세븐', name: '수세미건조대_실버', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/006_수세미건조대_실버.jpg' },
+  { brand: '데이세븐', name: '수세미건조대_블랙', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/007_수세미건조대_블랙.jpg' },
+  { brand: '데이세븐', name: '사각멀티볼_3.2L', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/008_사각멀티볼_3.2L.jpg' },
+  { brand: '데이세븐', name: '사각멀티볼_4.2L', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/009_사각멀티볼_4.2L.jpg' },
+  { brand: '데이세븐', name: '사각멀티볼_5.6L', status: '등록예정', image: '제품_데이터/01_데이세븐/02_등록예정_재고있음/010_사각멀티볼_5.6L.jpg' },
+  { brand: '데이세븐', name: '봉투거치대', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/001_봉투거치대.jpg' },
+  { brand: '데이세븐', name: '옴니팟_소', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/002_옴니팟_소.jpg' },
+  { brand: '데이세븐', name: '옴니팟_중', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/003_옴니팟_중.jpg' },
+  { brand: '데이세븐', name: '옴니팟_대', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/004_옴니팟_대.jpg' },
+  { brand: '데이세븐', name: '두부틀_소', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/005_두부틀_소.jpg' },
+  { brand: '데이세븐', name: '두부틀_중', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/006_두부틀_중.jpg' },
+  { brand: '데이세븐', name: '두부틀_대', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/007_두부틀_대.jpg' },
+  { brand: '데이세븐', name: '두부틀_특대', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/008_두부틀_특대.jpg' },
+  { brand: '데이세븐', name: '상추볼_소', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/009_상추볼_소.jpg' },
+  { brand: '데이세븐', name: '상추볼_중', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/010_상추볼_중.jpg' },
+  { brand: '데이세븐', name: '상추볼_대', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/011_상추볼_대.jpg' },
+  { brand: '데이세븐', name: '물병_1.5L', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/012_물병_1.5L.jpg' },
+  { brand: '데이세븐', name: '물병_1.7L', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/013_물병_1.7L.jpg' },
+  { brand: '데이세븐', name: '물병_1.9L', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/014_물병_1.9L.jpg' },
+  { brand: '데이세븐', name: '미니조리도구_01', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/015_미니조리도구_01.jpg' },
+  { brand: '데이세븐', name: '미니조리도구_02', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/016_미니조리도구_02.jpg' },
+  { brand: '데이세븐', name: '미니조리도구_03', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/017_미니조리도구_03.jpg' },
+  { brand: '데이세븐', name: '미니조리도구_04', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/018_미니조리도구_04.jpg' },
+  { brand: '데이세븐', name: '미니조리도구_05', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/019_미니조리도구_05.jpg' },
+  { brand: '데이세븐', name: '미니조리도구_06', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/020_미니조리도구_06.jpg' },
+  { brand: '데이세븐', name: '미니조리도구실리콘_01', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/021_미니조리도구실리콘_01.jpg' },
+  { brand: '데이세븐', name: '미니조리도구실리콘_02', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/022_미니조리도구실리콘_02.jpg' },
+  { brand: '데이세븐', name: '미니조리도구실리콘_03', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/023_미니조리도구실리콘_03.jpg' },
+  { brand: '데이세븐', name: '미니조리도구실리콘_04', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/024_미니조리도구실리콘_04.jpg' },
+  { brand: '데이세븐', name: '무연마쌀세척볼', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/025_무연마쌀세척볼.jpg' },
+  { brand: '데이세븐', name: '와이어찜판', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/026_와이어찜판.jpg' },
+  { brand: '데이세븐', name: '스텐컵', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/027_스텐컵.jpg' },
+  { brand: '데이세븐', name: '반찬통_01', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/028_반찬통_01.jpg' },
+  { brand: '데이세븐', name: '반찬통_02', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/029_반찬통_02.jpg' },
+  { brand: '데이세븐', name: '반찬통_03', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/030_반찬통_03.jpg' },
+  { brand: '데이세븐', name: '반찬통_04', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/031_반찬통_04.jpg' },
+  { brand: '데이세븐', name: '반찬통_05', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/032_반찬통_05.jpg' },
+  { brand: '데이세븐', name: '반찬통_06', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/033_반찬통_06.jpg' },
+  { brand: '데이세븐', name: '인덕션뚝배기', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/034_인덕션뚝배기.jpg' },
+  { brand: '데이세븐', name: '이중스텐컵_뚜껑', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/035_이중스텐컵_뚜껑.jpg' },
+  { brand: '데이세븐', name: '사각도마볼_소', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/036_사각도마볼_소.jpg' },
+  { brand: '데이세븐', name: '사각도마볼_중', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/037_사각도마볼_중.jpg' },
+  { brand: '데이세븐', name: '사각도마볼_대', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/038_사각도마볼_대.jpg' },
+  { brand: '데이세븐', name: '사각도마볼_특대', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/039_사각도마볼_특대.jpg' },
+  { brand: '데이세븐', name: '믹싱볼타공볼_소', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/040_믹싱볼타공볼_소.jpg' },
+  { brand: '데이세븐', name: '믹싱볼타공볼_중', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/041_믹싱볼타공볼_중.jpg' },
+  { brand: '데이세븐', name: '믹싱볼타공볼_대', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/042_믹싱볼타공볼_대.jpg' },
+  { brand: '데이세븐', name: '손잡이믹싱볼타공볼', status: '등록미정', image: '제품_데이터/01_데이세븐/03_등록미정_재고없음/043_손잡이믹싱볼타공볼.jpg' },
+  { brand: '대성공방', name: '찬접시_무광_8.8cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/001_찬접시_무광_8.8cm.jpg' },
+  { brand: '대성공방', name: '찬접시_무광_11.5cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/002_찬접시_무광_11.5cm.jpg' },
+  { brand: '대성공방', name: '찬접시_무광_13.5cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/003_찬접시_무광_13.5cm.jpg' },
+  { brand: '대성공방', name: '찬접시_무광_15cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/004_찬접시_무광_15cm.jpg' },
+  { brand: '대성공방', name: '찬접시_유광_8.8cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/005_찬접시_유광_8.8cm.jpg' },
+  { brand: '대성공방', name: '찬접시_유광_11.5cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/006_찬접시_유광_11.5cm.jpg' },
+  { brand: '대성공방', name: '찬접시_유광_13.5cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/007_찬접시_유광_13.5cm.jpg' },
+  { brand: '대성공방', name: '찬접시_유광_15cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/008_찬접시_유광_15cm.jpg' },
+  { brand: '대성공방', name: '면기_무광_19cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/009_면기_무광_19cm.jpg' },
+  { brand: '대성공방', name: '면기_무광_21cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/010_면기_무광_21cm.jpg' },
+  { brand: '대성공방', name: '면기_무광_23cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/011_면기_무광_23cm.jpg' },
+  { brand: '대성공방', name: '탕기_무광_17.3cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/012_탕기_무광_17.3cm.jpg' },
+  { brand: '대성공방', name: '탕기_무광_18.3cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/013_탕기_무광_18.3cm.jpg' },
+  { brand: '대성공방', name: '탕기_무광_19.3cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/014_탕기_무광_19.3cm.jpg' },
+  { brand: '대성공방', name: '합식기_무광_10.5cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/015_합식기_무광_10.5cm.jpg' },
+  { brand: '대성공방', name: '숟가락_방자', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/016_숟가락_방자.jpg' },
+  { brand: '대성공방', name: '젓가락_방자', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/017_젓가락_방자.jpg' },
+  { brand: '대성공방', name: '이중물컵_7cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/018_이중물컵_7cm.jpg' },
+  { brand: '대성공방', name: '무광_이중1단대접_14cm', status: '등록예정', image: '제품_데이터/02_대성공방/02_등록예정_재고있음/019_무광_이중1단대접_14cm.jpg' },
+  { brand: '버디베어', name: '반양피_화이트_캐릭터', status: '등록완료', image: '제품_데이터/03_버디베어/01_등록완료/001_반양피_화이트_캐릭터.jpg' },
+  { brand: '버디베어', name: '반양피_화이트_로고', status: '등록완료', image: '제품_데이터/03_버디베어/01_등록완료/002_반양피_화이트_로고.jpg' },
+  { brand: '버디베어', name: '올양피_화이트_로고', status: '등록완료', image: '제품_데이터/03_버디베어/01_등록완료/003_올양피_화이트_로고.jpg' },
+  { brand: '버디베어', name: '볼마커클립세트', status: '등록완료', image: '제품_데이터/03_버디베어/01_등록완료/004_볼마커클립세트.jpg' },
+  { brand: '마이야르', name: '무연마돔스티머', status: '등록완료', image: '제품_데이터/04_마이야르/01_등록완료/001_무연마돔스티머.jpg' },
+  { brand: '마이야르', name: '마이야르프라이팬', status: '등록미정', image: '제품_데이터/04_마이야르/03_등록미정_재고없음/001_마이야르프라이팬.jpg' },
+  { brand: '스티바', name: '식기건조대', status: '등록미정', image: '제품_데이터/05_스티바/03_등록미정_재고없음/001_식기건조대.jpg' },
+  { brand: '스티바', name: '빨래통', status: '등록미정', image: '제품_데이터/05_스티바/03_등록미정_재고없음/002_빨래통.jpg' },
+];
+/* ================================================================ */
+
+const STATUS_META = {
+  '등록완료': { cls: 'badge-done',  dot: 'dot-done',  label: '등록완료' },
+  '등록예정': { cls: 'badge-ready', dot: 'dot-ready', label: '등록예정(재고있음)' },
+  '등록미정': { cls: 'badge-none',  dot: 'dot-none',  label: '등록미정(재고없음)' },
+};
+
+/* 첫 화면 기본값: 데이세븐 + 등록완료 */
+let activeBrand  = '데이세븐';
+let activeStatus = '등록완료';
+
+const brands = [...new Set(PRODUCTS.map(p => p.brand))];
+
+/* 브랜드 칩 생성 */
+const brandGroup = document.getElementById('brandGroup');
+[{ val: 'all', label: '전체' }, ...brands.map(b => ({ val: b, label: b }))]
+  .forEach(({ val, label }) => {
+    const btn = document.createElement('button');
+    btn.className = 'chip-brand' + (val === activeBrand ? ' active' : '');
+    btn.dataset.brand = val;
+    btn.textContent = label;
+    brandGroup.appendChild(btn);
+  });
+
+brandGroup.addEventListener('click', e => {
+  const chip = e.target.closest('[data-brand]');
+  if (!chip) return;
+  activeBrand = chip.dataset.brand;
+  brandGroup.querySelectorAll('.chip-brand').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  render();
+});
+
+document.getElementById('statusGroup').addEventListener('click', e => {
+  const chip = e.target.closest('[data-status]');
+  if (!chip) return;
+  activeStatus = chip.dataset.status;
+  document.getElementById('statusGroup').querySelectorAll('.chip-status').forEach(c => c.classList.remove('active'));
+  chip.classList.add('active');
+  render();
+});
+
+function filtered() {
+  return PRODUCTS.filter(p =>
+    (activeBrand  === 'all' || p.brand  === activeBrand) &&
+    (activeStatus === 'all' || p.status === activeStatus)
+  );
+}
+
+function placeholder() {
+  return `<div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="3" y="3" width="18" height="18" rx="2" stroke="#888" stroke-width="1.2"/>
+    <circle cx="8.5" cy="8.5" r="1.5" fill="#888"/>
+    <path d="M3 16l5-5 4 4 3-3 6 6" stroke="#888" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg></div>`;
+}
+
+function cardHTML(p) {
+  const meta = STATUS_META[p.status] || STATUS_META['등록미정'];
+  const img  = p.image
+    ? `<img class="card-image" src="${p.image}" alt="${p.name}" loading="lazy" />`
+    : placeholder();
+  return `<div class="card">${img}<div class="card-body">
+    <p class="card-name">${p.name}</p>
+    <span class="badge ${meta.cls}">${meta.label}</span>
+  </div></div>`;
+}
+
+function renderSummary(data) {
+  const c = { '등록완료': 0, '등록예정': 0, '등록미정': 0 };
+  data.forEach(p => { if (c[p.status] !== undefined) c[p.status]++; });
+  document.getElementById('summaryBar').innerHTML = `
+    <div class="summary-item"><span class="summary-count">${data.length}</span><span>개 제품</span></div>
+    <div class="summary-item"><span class="dot dot-done"></span><span class="summary-count">${c['등록완료']}</span><span>등록완료</span></div>
+    <div class="summary-item"><span class="dot dot-ready"></span><span class="summary-count">${c['등록예정']}</span><span>등록예정</span></div>
+    <div class="summary-item"><span class="dot dot-none"></span><span class="summary-count">${c['등록미정']}</span><span>등록미정</span></div>`;
+}
+
+function render() {
+  const data = filtered();
+  renderSummary(data);
+  const mainEl = document.getElementById('main');
+
+  if (activeBrand !== 'all') {
+    mainEl.innerHTML = `<div class="product-grid">${
+      data.length ? data.map(cardHTML).join('') : '<div class="empty">해당하는 제품이 없습니다</div>'
+    }</div>`;
+    return;
+  }
+
+  const byBrand = Object.fromEntries(brands.map(b => [b, []]));
+  data.forEach(p => { if (byBrand[p.brand]) byBrand[p.brand].push(p); });
+
+  const html = brands
+    .filter(b => byBrand[b].length > 0)
+    .map(b => `<div class="brand-section">
+      <p class="brand-heading">${b}</p>
+      <div class="product-grid">${byBrand[b].map(cardHTML).join('')}</div>
+    </div>`).join('');
+
+  mainEl.innerHTML = html || '<div class="empty" style="padding:60px 0">해당하는 제품이 없습니다</div>';
+}
+
+render();
+</script>
+</body>
+</html>
