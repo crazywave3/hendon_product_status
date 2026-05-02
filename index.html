@@ -286,6 +286,61 @@
       color: var(--text-muted);
       font-size: 13px;
     }
+
+    /* ── 검색창 공통 ── */
+    .search-box {
+      display: flex;
+      align-items: center;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 4px 10px;
+      gap: 5px;
+    }
+    .search-box svg { flex-shrink: 0; opacity: 0.35; }
+    .search-input {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 12px;
+      border: none;
+      background: transparent;
+      outline: none;
+      color: var(--text-primary);
+      width: 120px;
+    }
+    .search-clear {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: none;
+      align-items: center;
+      opacity: 0.35;
+      flex-shrink: 0;
+    }
+    .search-clear:hover { opacity: 0.7; }
+    .search-clear.visible { display: flex; }
+
+    /* 모바일: 필터 위에 별도 행 */
+    .search-row-mobile {
+      display: flex;
+      padding: 8px 14px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+    }
+    .search-row-mobile .search-box { flex: 1; }
+    .search-row-mobile .search-input { width: 100%; }
+
+    /* 데스크탑: 브랜드 필터 행 오른쪽 */
+    .search-row-mobile { display: flex; }
+    @media (min-width: 768px) {
+      .search-row-mobile { display: none; }
+      .filter-row-brand { display: flex; align-items: center; gap: 5px; }
+      .search-desktop {
+        display: flex !important;
+        flex-shrink: 0;
+        padding-left: 4px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -295,7 +350,21 @@
     <p class="site-title">핸든 제품 현황<span>Hendon</span></p>
     <button class="btn-all" id="btnAll">핸든 제품 전체보기</button>
   </div>
-  <div class="filter-row-brand" id="brandGroup"></div>
+
+  <!-- 모바일 검색창 (필터 위) -->
+  <div class="search-row-mobile">
+    <div class="search-box">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#666" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input class="search-input" id="searchInputMobile" type="text" placeholder="제품명 검색 (2자 이상)" />
+      <button class="search-clear" id="searchClearMobile" aria-label="검색 초기화">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="filter-row-brand" id="brandGroup">
+  </div>
+
   <div class="filter-row-status">
     <div class="filter-status-inner" id="statusGroup">
       <button class="chip-status" data-status="all"><span class="btn-label">전체</span><span class="btn-count" id="cnt-all"></span></button>
@@ -528,6 +597,7 @@ const STATUS_META = {
 /* 첫 화면 기본값: 데이세븐 + 등록완료 */
 let activeBrand  = '데이세븐';
 let activeStatus = '등록완료';
+let searchQuery  = '';
 
 const brands = [...new Set(PRODUCTS.map(p => p.brand))];
 
@@ -553,10 +623,30 @@ brands.map(b => ({ val: b, label: b }))
     brandGroup.appendChild(btn);
   });
 
+/* 데스크탑 검색창을 브랜드 칩 뒤에 추가 */
+brandGroup.insertAdjacentHTML('beforeend', `
+  <div class="search-box search-desktop" style="display:none;">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#666" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
+    <input class="search-input" id="searchInputDesktop" type="text" placeholder="제품명 검색 (2자 이상)" />
+    <button class="search-clear" id="searchClearDesktop" aria-label="검색 초기화">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+`);
+
 /* 전체보기 버튼 */
+function clearSearch() {
+  searchQuery = '';
+  document.getElementById('searchInputMobile').value = '';
+  document.getElementById('searchInputDesktop').value = '';
+  document.getElementById('searchClearMobile').classList.remove('visible');
+  document.getElementById('searchClearDesktop').classList.remove('visible');
+}
+
 document.getElementById('btnAll').addEventListener('click', () => {
   activeBrand = 'all';
   activeStatus = 'all';
+  clearSearch();
   brandGroup.querySelectorAll('.chip-brand').forEach(c => c.classList.remove('active'));
   document.getElementById('statusGroup').querySelectorAll('.chip-status').forEach(c => c.classList.remove('active'));
   document.getElementById('btnAll').classList.add('active');
@@ -570,6 +660,7 @@ brandGroup.addEventListener('click', e => {
   if (!chip) return;
   activeBrand = chip.dataset.brand;
   activeStatus = '등록완료';
+  clearSearch();
   brandGroup.querySelectorAll('.chip-brand').forEach(c => c.classList.remove('active'));
   chip.classList.add('active');
   document.getElementById('btnAll').classList.remove('active');
@@ -629,7 +720,7 @@ function renderCards() {
   const mainEl = document.getElementById('main');
 
   if (activeBrand !== 'all') {
-    const data = filtered();
+    const data = filteredWithSearch();
     mainEl.innerHTML = data.length
       ? `<div class="product-grid">${data.map(cardHTML).join('')}</div>`
       : '<div class="empty">해당하는 제품이 없습니다</div>';
@@ -637,9 +728,12 @@ function renderCards() {
   }
 
   const html = brands.map(b => {
-    const data = PRODUCTS.filter(p =>
+    let data = PRODUCTS.filter(p =>
       p.brand === b && (activeStatus === 'all' || p.status === activeStatus)
     );
+    if (searchQuery.length >= 2) {
+      data = data.filter(p => p.name.includes(searchQuery));
+    }
     if (!data.length) return '';
     return `<div class="brand-section">
       <p class="brand-heading">${b}</p>
@@ -652,6 +746,49 @@ function renderCards() {
 
 renderSummary();
 renderCards();
+
+/* ── 검색 ── */
+function syncSearch(val) {
+  searchQuery = val.trim();
+  const clearM = document.getElementById('searchClearMobile');
+  const clearD = document.getElementById('searchClearDesktop');
+  clearM.classList.toggle('visible', val.length > 0);
+  clearD.classList.toggle('visible', val.length > 0);
+  renderCards();
+}
+
+function filteredWithSearch() {
+  let data = PRODUCTS.filter(p =>
+    (activeBrand  === 'all' || p.brand  === activeBrand) &&
+    (activeStatus === 'all' || p.status === activeStatus)
+  );
+  if (searchQuery.length >= 2) {
+    data = data.filter(p => p.name.includes(searchQuery));
+  }
+  return data;
+}
+
+/* 검색 입력 이벤트 - 모바일 */
+document.getElementById('searchInputMobile').addEventListener('input', e => {
+  document.getElementById('searchInputDesktop').value = e.target.value;
+  syncSearch(e.target.value);
+});
+document.getElementById('searchClearMobile').addEventListener('click', () => {
+  document.getElementById('searchInputMobile').value = '';
+  document.getElementById('searchInputDesktop').value = '';
+  syncSearch('');
+});
+
+/* 검색 입력 이벤트 - 데스크탑 */
+document.getElementById('searchInputDesktop').addEventListener('input', e => {
+  document.getElementById('searchInputMobile').value = e.target.value;
+  syncSearch(e.target.value);
+});
+document.getElementById('searchClearDesktop').addEventListener('click', () => {
+  document.getElementById('searchInputMobile').value = '';
+  document.getElementById('searchInputDesktop').value = '';
+  syncSearch('');
+});
 
 /* 모바일 Pull-to-refresh 방지 */
 let startY = 0;
