@@ -279,6 +279,241 @@
       font-size: 13px;
     }
 
+    /* ── 탭 ── */
+    .tab-row {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+    }
+
+    .tab-btn {
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 13px;
+      font-weight: 400;
+      padding: 12px 20px;
+      border: none;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--text-primary); }
+    .tab-btn.active {
+      color: var(--text-primary);
+      font-weight: 600;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    /* ── 신제품 플로우 카드 ── */
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      padding: 14px 10px 56px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 768px) {
+      .flow-grid {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 13px;
+        padding: 18px 20px 60px;
+      }
+    }
+
+    .flow-card {
+      background: var(--surface);
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.16s, box-shadow 0.16s;
+    }
+    .flow-card:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(0,0,0,0.07); }
+
+    .flow-card-body {
+      padding: 7px 8px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .flow-card-name {
+      font-size: 11px;
+      font-weight: 500;
+      color: var(--text-primary);
+      line-height: 1.4;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    @media (min-width: 768px) {
+      .flow-card-name { font-size: 12px; }
+      .flow-card-body { padding: 9px 10px 11px; }
+    }
+
+    /* 단계 점 */
+    .flow-dots {
+      display: flex;
+      gap: 3px;
+      flex-wrap: wrap;
+    }
+
+    .flow-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #DEDDD9;
+      flex-shrink: 0;
+      transition: background 0.2s;
+    }
+    .flow-dot.done { background: #5AA830; }
+    .flow-dot.current { background: #E09020; }
+
+    .flow-step-label {
+      font-size: 10px;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    /* ── 팝업 모달 ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.45);
+      z-index: 500;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border-radius: 14px;
+      width: 100%;
+      max-width: 420px;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--surface);
+    }
+
+    .modal-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      object-fit: cover;
+      background: #EDECEA;
+      flex-shrink: 0;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .modal-brand {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 4px;
+      color: var(--text-muted);
+      font-size: 18px;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+    .modal-close:hover { color: var(--text-primary); }
+
+    .modal-steps {
+      padding: 12px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .modal-step {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      transition: all 0.15s;
+      background: var(--surface);
+    }
+    .modal-step:hover { background: var(--bg); }
+
+    .modal-step.done {
+      background: #F0F7EB;
+      border-color: #C5DEB0;
+    }
+    .modal-step.current {
+      background: #FEF6E4;
+      border-color: #F5C842;
+    }
+
+    .modal-step-num {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: #EDECEA;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      flex-shrink: 0;
+    }
+    .modal-step.done .modal-step-num {
+      background: #5AA830;
+      color: #fff;
+    }
+    .modal-step.current .modal-step-num {
+      background: #E09020;
+      color: #fff;
+    }
+
+    .modal-step-name {
+      font-size: 13px;
+      color: var(--text-primary);
+      flex: 1;
+    }
+    .modal-step.done .modal-step-name { color: #3A6B12; }
+    .modal-step.current .modal-step-name { color: #8A5010; font-weight: 500; }
+
+    .modal-step-icon {
+      font-size: 14px;
+      color: var(--text-muted);
+    }
+    .modal-step.done .modal-step-icon { color: #5AA830; }
+
     /* ── 검색창 공통 ── */
     .search-box {
       display: flex;
@@ -361,33 +596,62 @@
     <button class="btn-all" id="btnAll">핸든 제품 전체보기</button>
   </div>
 
-  <!-- 모바일 검색창 (필터 위) -->
-  <div class="search-row-mobile" id="searchRowMobile">
-    <div class="search-box">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#666" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
-      <input class="search-input" id="searchInputMobile" type="text" placeholder="제품명 검색 (2자 이상)" />
-      <button class="search-clear" id="searchClearMobile" aria-label="검색 초기화">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
-      </button>
+  <!-- 탭 -->
+  <div class="tab-row">
+    <button class="tab-btn active" id="tabProduct" onclick="switchTab('product')">제품 현황</button>
+    <button class="tab-btn" id="tabFlow" onclick="switchTab('flow')">신제품 플로우</button>
+  </div>
+
+  <!-- 제품현황 필터 (탭에 따라 숨김) -->
+  <div id="productFilters">
+    <!-- 모바일 검색창 (필터 위) -->
+    <div class="search-row-mobile" id="searchRowMobile">
+      <div class="search-box">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#666" stroke-width="1.8"/><path d="M16.5 16.5L21 21" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input class="search-input" id="searchInputMobile" type="text" placeholder="제품명 검색 (2자 이상)" />
+        <button class="search-clear" id="searchClearMobile" aria-label="검색 초기화">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="#666" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+      </div>
     </div>
-  </div>
 
-  <div class="filter-row-brand" id="brandGroup">
-  </div>
+    <div class="filter-row-brand" id="brandGroup"></div>
 
-  <div class="filter-row-status">
-    <div class="filter-status-inner" id="statusGroup">
-      <button class="chip-status" data-status="all"><span class="btn-label">전체</span><span class="btn-count" id="cnt-all"></span></button>
-      <button class="chip-status active" data-status="등록완료"><span class="btn-label">등록완료</span><span class="btn-count" id="cnt-done"></span></button>
-      <button class="chip-status" data-status="등록예정"><span class="btn-label">등록예정(재고있음)</span><span class="btn-count" id="cnt-ready"></span></button>
-      <button class="chip-status" data-status="등록미정"><span class="btn-label">등록미정(재고없음)</span><span class="btn-count" id="cnt-none"></span></button>
+    <div class="filter-row-status">
+      <div class="filter-status-inner" id="statusGroup">
+        <button class="chip-status" data-status="all"><span class="btn-label">전체</span><span class="btn-count" id="cnt-all"></span></button>
+        <button class="chip-status active" data-status="등록완료"><span class="btn-label">등록완료</span><span class="btn-count" id="cnt-done"></span></button>
+        <button class="chip-status" data-status="등록예정"><span class="btn-label">등록예정(재고있음)</span><span class="btn-count" id="cnt-ready"></span></button>
+        <button class="chip-status" data-status="등록미정"><span class="btn-label">등록미정(재고없음)</span><span class="btn-count" id="cnt-none"></span></button>
+      </div>
     </div>
   </div>
 </header>
 
+<!-- 제품 현황 섹션 -->
+<div id="productSection">
+  <main id="main"></main>
+</div>
 
+<!-- 신제품 플로우 섹션 -->
+<div id="flowSection">
+  <div class="flow-grid" id="flowGrid"></div>
+</div>
 
-<main id="main"></main>
+<!-- 팝업 모달 -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <img class="modal-thumb" id="modalThumb" src="" alt="" />
+      <div>
+        <p class="modal-title" id="modalTitle"></p>
+        <p class="modal-brand" id="modalBrand"></p>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-steps" id="modalSteps"></div>
+  </div>
+</div>
 
 <script>
 /* ================================================================
@@ -772,6 +1036,141 @@ function renderCards() {
 
 renderSummary();
 renderCards();
+
+/* ================================================================
+   ★ 신제품 플로우 데이터 ★
+   currentStep: 현재 진행 단계 (1~9)
+================================================================ */
+const FLOW_PRODUCTS = [
+  { brand: '데이세븐', name: '옴니팟',          code: 'DS001', currentStep: 2, image: '제품_데이터/99_신제품_플로우/001_옴니팟.jpg' },
+  { brand: '데이세븐', name: '일자형_반찬통',   code: 'DS002', currentStep: 4, image: '제품_데이터/99_신제품_플로우/002_일자형_반찬통.jpg' },
+  { brand: '데이세븐', name: '사각도마볼',       code: 'DS003', currentStep: 6, image: '제품_데이터/99_신제품_플로우/003_사각도마볼.jpg' },
+  { brand: '데이세븐', name: '프리미엄믹싱볼',  code: 'DS004', currentStep: 3, image: '제품_데이터/99_신제품_플로우/004_프리미엄믹싱볼.jpg' },
+  { brand: '데이세븐', name: '이지그립_믹싱볼', code: 'DS005', currentStep: 7, image: '제품_데이터/99_신제품_플로우/005_이지그립_믹싱볼.jpg' },
+];
+
+const FLOW_STEPS = [
+  '중국공장 신제품발견',
+  '샘플수령',
+  '사진촬영 / 상세페이지',
+  '한글표시사항',
+  '중국발주',
+  '선적',
+  '그라첸 입고',
+  '품목등록 / 특별단가',
+  '스토어 입점',
+];
+
+/* 탭 전환 */
+function switchTab(tab) {
+  if (tab === 'product') {
+    document.getElementById('productSection').style.display = 'block';
+    document.getElementById('flowSection').style.display = 'none';
+    document.getElementById('productFilters').style.display = 'block';
+    document.getElementById('tabProduct').classList.add('active');
+    document.getElementById('tabFlow').classList.remove('active');
+    document.getElementById('btnAll').style.display = '';
+  } else {
+    document.getElementById('productSection').style.display = 'none';
+    document.getElementById('flowSection').style.display = 'block';
+    document.getElementById('productFilters').style.display = 'none';
+    document.getElementById('tabProduct').classList.remove('active');
+    document.getElementById('tabFlow').classList.add('active');
+    document.getElementById('btnAll').style.display = 'none';
+    renderFlow();
+  }
+  window.scrollTo({ top: 0 });
+}
+
+/* 플로우 카드 렌더 */
+function renderFlow() {
+  const grid = document.getElementById('flowGrid');
+  if (!FLOW_PRODUCTS.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 0;color:var(--text-muted);font-size:13px">진행 중인 신제품이 없습니다</div>';
+    return;
+  }
+
+  grid.innerHTML = FLOW_PRODUCTS.map((p, idx) => {
+    const imgSrc = p.image ? p.image.replace(/ /g, '%20') : null;
+    const imgEl = imgSrc
+      ? `<img class="card-image" src="${imgSrc}" alt="${p.name}" loading="lazy" />`
+      : `<div class="img-placeholder"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#888" stroke-width="1.2"/><circle cx="8.5" cy="8.5" r="1.5" fill="#888"/><path d="M3 16l5-5 4 4 3-3 6 6" stroke="#888" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>`;
+
+    const dots = Array.from({length: 9}, (_, i) => {
+      const step = i + 1;
+      const cls = step < p.currentStep ? 'done' : step === p.currentStep ? 'current' : '';
+      return `<div class="flow-dot ${cls}"></div>`;
+    }).join('');
+
+    const stepLabel = p.currentStep <= 9
+      ? `${p.currentStep}단계 · ${FLOW_STEPS[p.currentStep - 1]}`
+      : '완료';
+
+    return `<div class="flow-card" onclick="openModal(${idx})">
+      ${imgEl}
+      <div class="flow-card-body">
+        <p class="flow-card-name">${p.name}</p>
+        <div class="flow-dots">${dots}</div>
+        <p class="flow-step-label">${stepLabel}</p>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* 모달 열기 */
+let currentModalIdx = -1;
+
+function openModal(idx) {
+  currentModalIdx = idx;
+  const p = FLOW_PRODUCTS[idx];
+  const imgSrc = p.image ? p.image.replace(/ /g, '%20') : null;
+
+  const thumb = document.getElementById('modalThumb');
+  if (imgSrc) {
+    thumb.src = imgSrc;
+    thumb.style.display = 'block';
+  } else {
+    thumb.style.display = 'none';
+  }
+
+  document.getElementById('modalTitle').textContent = p.name;
+  document.getElementById('modalBrand').textContent = p.brand + ' · ' + p.code;
+  renderModalSteps(p);
+  document.getElementById('modalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderModalSteps(p) {
+  const stepsEl = document.getElementById('modalSteps');
+  stepsEl.innerHTML = FLOW_STEPS.map((name, i) => {
+    const step = i + 1;
+    const cls = step < p.currentStep ? 'done' : step === p.currentStep ? 'current' : '';
+    const icon = step < p.currentStep ? '✓' : step === p.currentStep ? '▶' : '';
+    return `<div class="modal-step ${cls}" onclick="setStep(${step})">
+      <div class="modal-step-num">${step}</div>
+      <div class="modal-step-name">${name}</div>
+      <div class="modal-step-icon">${icon}</div>
+    </div>`;
+  }).join('');
+}
+
+/* 단계 변경 */
+function setStep(step) {
+  if (currentModalIdx < 0) return;
+  FLOW_PRODUCTS[currentModalIdx].currentStep = step;
+  renderModalSteps(FLOW_PRODUCTS[currentModalIdx]);
+  renderFlow();
+}
+
+/* 모달 닫기 */
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentModalIdx = -1;
+}
 
 /* ── 검색 ── */
 function syncSearch(val) {
